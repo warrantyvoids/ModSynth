@@ -6,3 +6,6 @@
 *.fatbin
 firmware/cmake-*
 *.idea
+
+docs/_*
+docs/.*

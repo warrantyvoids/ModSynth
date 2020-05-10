@@ -1,3 +1,8 @@
+---
+layout: home
+title: Home
+nav_order: 0
+---
 # ModSynth
 
 ## What is ModSynth?

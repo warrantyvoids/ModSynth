@@ -5,24 +5,35 @@
 #include "usbd_midi_if.h"
 #include "stm32f7xx_hal.h"
 
-static uint16_t MIDI_DataRx(uint8_t *msg, uint16_t length);
-static uint16_t MIDI_DataTx(uint8_t *msg, uint16_t length);
+static void MIDI_HandleMessage(const uint8_t * const pData, uint16_t length);
+
 extern DAC_HandleTypeDef hdac;
 USBD_MIDI_ItfTypeDef USBD_Interface_midi_fops_FS =
         {
-                MIDI_DataRx,
-                MIDI_DataTx
+		        MIDI_HandleMessage,
         };
 
 //See the USB MIDI spec, page 16 for these.
-#define MSG_NOTE_STOP 0x80u
-#define MSG_NOTE_PLAY 0x90u
-#define MSG_POLY_KEYPRESS 0xA0u
-#define MSG_CONTROL_CHANGE 0xB0u
-#define MSG_PROGRAM_CHANGE 0xC0u
-#define MSG_CHANNEL_PRESSURE 0xD0u
-#define MSG_PITCHBEND_CHANGE 0xE0u
-#define MSG_SINGLE_BYTE 0xF0u
+typedef enum {
+	RESERVED = 0x0u,
+	CABLE_RESERVED = 0x1u,
+	SYSTEM_COMMON_2 = 0x2u,
+	SYSTEM_COMMON_3 = 0x3u,
+	SYSEX_START = 0x4u,
+	SYSEX_ENDS_1 = 0x5u,
+	SYSEX_ENDS_2 = 0x6u,
+	SYSEX_ENDS_3 = 0x7u,
+	NOTE_STOP = 0x8u,
+	NOTE_PLAY = 0x9u,
+	POLY_KEYPRESS = 0xAu,
+	CONTROL_CHANGE = 0xBu,
+	PROGRAM_CHANGE = 0xCu,
+	CHANNEL_PRESSURE = 0xDu,
+	PITCHBEND_CHANGE = 0xEu,
+	SINGLE_BYTE_UNPARSED = 0xFu,
+} CIN_Types;
+#define CABLE_INDEX_MASK(x) (((x) & 0xF0u) >> 4u)
+#define CIN_MASK(x) ((CIN_Types)((x) & 0x0Fu))
 
 //Used to define the range of this Midi-2-CV.
 #define NOTE_C2 36
@@ -34,23 +45,23 @@ USBD_MIDI_ItfTypeDef USBD_Interface_midi_fops_FS =
 #define ADC_MIN (ADC_LIN_OFFSET)
 #define ADC_RANGE (ADC_MAX - ADC_MIN)
 
-static uint16_t MIDI_DataRx(uint8_t *msg, uint16_t length)
+static void MIDI_HandleMessage(const uint8_t * const pData, uint16_t length)
 {
-    uint8_t chan = msg[1] & 0xfu;
-    uint8_t msgtype = msg[1] & 0xf0u;
-    uint8_t b1 =  msg[2];
-    uint8_t b2 =  msg[3];
-    uint16_t b = ((b2 & 0x7fu) << 7u) | (b1 & 0x7fu);
+    uint8_t cableIndex = CABLE_INDEX_MASK(pData[0]);
+	CIN_Types codeIndexNumber = CIN_MASK(pData[0]);
+    uint8_t midi_0 = length > 1 ? pData[1] : 0u;
+    uint8_t midi_1 = length > 2 ? pData[2] : 0u;
+	uint8_t midi_2 = length > 3 ? pData[3] : 0u;
 
-    switch (msgtype)
+    switch (codeIndexNumber)
     {
-        case MSG_NOTE_STOP:
+        case NOTE_STOP:
             HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_RESET);
             HAL_GPIO_WritePin(GATE_1_GPIO_Port, GATE_1_Pin, GPIO_PIN_RESET);
             break;
-        case MSG_NOTE_PLAY:
-            if (b2 != 0 && b1 >= NOTE_C2 && b1 <= NOTE_C7) {
-                uint8_t note_offset = b1 - NOTE_C2;
+        case NOTE_PLAY:
+            if (midi_2 != 0 && midi_1 >= NOTE_C2 && midi_1 <= NOTE_C7) {
+                uint8_t note_offset = midi_0 - NOTE_C2;
                 int data = (note_offset * ADC_RANGE) / (NOTE_C7 - NOTE_C2) + ADC_MIN;
                 HAL_GPIO_WritePin(GATE_1_GPIO_Port, GATE_1_Pin, GPIO_PIN_SET);
                 HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_SET);
@@ -60,32 +71,8 @@ static uint16_t MIDI_DataRx(uint8_t *msg, uint16_t length)
                 HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_RESET);
             }
             break;
-        case MSG_POLY_KEYPRESS:
-            break;
-        case MSG_CONTROL_CHANGE:
-            break;
-        case MSG_PROGRAM_CHANGE:
-            break;
-        case MSG_CHANNEL_PRESSURE:
-            break;
-        case MSG_PITCHBEND_CHANGE:
-            break;
-        case MSG_SINGLE_BYTE:
+        default:
             break;
     }
-    return 0;
 }
 
-static uint16_t MIDI_DataTx(uint8_t *msg, uint16_t length)
-{
-    uint32_t i = 0;
-    while (i < length) {
-        APP_Rx_Buffer[APP_Rx_ptr_in] = *(msg + i);
-        APP_Rx_ptr_in++;
-        i++;
-        if (APP_Rx_ptr_in == APP_RX_DATA_SIZE) {
-            APP_Rx_ptr_in = 0;
-        }
-    }
-    return USBD_OK;
-}

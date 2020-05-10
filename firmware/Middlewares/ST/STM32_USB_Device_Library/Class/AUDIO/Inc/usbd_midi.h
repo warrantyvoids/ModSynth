@@ -30,10 +30,9 @@ extern "C" {
 
 #define MIDI_IN_FRAME_INTERVAL		1
 
-typedef struct _USBD_MIDI_ItfTypeDef{
-    uint16_t (*pIf_MidiRx)    (uint8_t *msg, uint16_t length);
-    uint16_t (*pIf_MidiTx)    (uint8_t *msg, uint16_t length);
-}USBD_MIDI_ItfTypeDef;
+typedef struct {
+    void (*pIf_MidiRx)    (const uint8_t * const msg, uint16_t length);
+} USBD_MIDI_ItfTypeDef ;
 
 extern uint8_t APP_Rx_Buffer   [APP_RX_DATA_SIZE];
 extern uint32_t APP_Rx_ptr_in;

@@ -180,7 +180,7 @@ __ALIGN_BEGIN uint8_t USBD_MIDI_CfgDesc[USB_MIDI_CONFIG_DESC_SIZ] __ALIGN_END =
                 0x05,        // bLength
                 0x25,        // bDescriptorType (See Next Line)
                 0x01,        // bDescriptorSubtype (CS_ENDPOINT -> MS_GENERAL)
-                0x01,        // BaAssocJackID(1) (num of MIDI **OUT** Jacks)
+                0x01,        // bNumEmbMIDIJack(1) (num of MIDI **OUT** Jacks)
                 MIDI_JACK_USB_IN, // BaAssocJackID(1) 1
         };
 
@@ -209,10 +209,10 @@ static uint8_t USBD_MIDI_DataIn (USBD_HandleTypeDef *pdev, uint8_t epnum){
 
 static uint8_t  USBD_MIDI_DataOut (USBD_HandleTypeDef *pdev, uint8_t epnum)
 {
-    USBD_MIDI_ItfTypeDef *pmidi = (USBD_MIDI_ItfTypeDef *)(pdev->pUserData);
+    USBD_MIDI_ItfTypeDef *pMidi = (USBD_MIDI_ItfTypeDef *)(pdev->pUserData);
     uint16_t USB_Rx_Cnt = ((PCD_HandleTypeDef*)pdev->pData)->OUT_ep[epnum].xfer_count;
 
-    pmidi->pIf_MidiRx((uint8_t *)&USB_Rx_Buffer, USB_Rx_Cnt);
+    pMidi->pIf_MidiRx((uint8_t *)&USB_Rx_Buffer, USB_Rx_Cnt);
 
     USBD_LL_PrepareReceive(pdev,MIDI_OUT_EP,(uint8_t*)(USB_Rx_Buffer),MIDI_DATA_OUT_PACKET_SIZE);
     return USBD_OK;
