@@ -2,7 +2,7 @@
 layout: page
 title: USB MIDI Descriptor
 permalink: /modules/midi2cv/midi-descriptor
-nav_order: 1
+nav_order: 2
 parent: MIDI 2 CV
 grand_parent: Modules
 ---

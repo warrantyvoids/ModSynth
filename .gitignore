@@ -9,3 +9,5 @@ firmware/cmake-*
 
 docs/_*
 docs/.*
+!docs/_includes
+!docs/_layouts

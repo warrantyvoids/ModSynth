@@ -3,6 +3,7 @@ layout: page
 title: Tools
 permalink: /about/tools/
 nav_order: 3
+mathjax: true
 ---
 
 # What tools/components do you need?
@@ -35,8 +36,8 @@ Music:
 
 ## Components
 Passives:
-- A set of E12 metal film resistors (1 ohm - 10 ohm)
-- A set of E6 ceramic capacitors (10pF - 10uF)
+- A set of E12 metal film resistors (1$\Omega$ - 10M$\Omega$)
+- A set of E6 ceramic capacitors (10pF - 10$\mu$F)
 - A set of electrolytic capacitors
 - A set of inductors
 - A set of WS2182-style potentiometers for knobs
