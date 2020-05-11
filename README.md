@@ -10,4 +10,4 @@ Furthermore, I enjoy making music and have been playing - among other things - w
 I'd love to start with some Eurorack modules, but they are prohibitively expensive.
 I do however have a lot of components and all the tools to build everything myself.
 
-[Read More on the GitHub Pages!](https://warrantyvoids.github.io/ModSynth).
+[Read More on the GitHub Pages!](https://warrantyvoids.github.io/ModSynth)
