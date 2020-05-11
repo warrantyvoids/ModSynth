@@ -24,7 +24,7 @@ github_username:  warrantyvoids
 
 # Build settings
 markdown: kramdown
-remote_theme: pmarsceill/just-the-docs
+theme: just-the-docs
 color_scheme: "light"
 plugins:
   - jekyll-feed
@@ -44,5 +44,3 @@ kramdown:
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
-
-theme: jekyll-theme-hacker
